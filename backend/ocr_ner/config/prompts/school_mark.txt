@@ -1,0 +1,11 @@
+Extract the following information from the text:
+- Name (student's full name)
+- Examination Name
+- Passout Year
+- Board or University's Name
+- Roll Number
+- School Name
+- Type of Steam (like Science, Commerce or Arts)
+- Division
+
+Return your answer in JSON format with keys: "name", "exam_name", "passout", "board", "roll_number", "school", "steam", "division".father_name", "mother_name", "roll_number", "school", "division".

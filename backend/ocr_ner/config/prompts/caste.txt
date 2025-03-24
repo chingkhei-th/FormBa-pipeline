@@ -1,0 +1,12 @@
+Extract the following information from the text:
+- Name (person's full name)
+- Caste Category type (caste category type such as OBC, Schedule Tribe or Schedule Caste)
+- Application number
+- Relative (person's father's name or mother's name)
+- Village or Town name
+- Police Station
+- District Name
+- Caste Name
+- issue Date of the certificate
+
+Return your answer in JSON format with keys: "name", "caste", "application_number", "relative", "village_town", "police_station", "district", "caste_name", "issue_date".

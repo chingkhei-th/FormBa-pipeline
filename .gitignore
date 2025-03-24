@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.qodo
+tempCodeRunnerFile.python
+app.log
+
+# Virtual environments
+.venv
+
+# Data
+data/
+notebooks/output/
+
+# Temporary testing files
+temp/
+scripts/
+notebooks/
+
+# Envirionment variable
+backend/.env
+.env

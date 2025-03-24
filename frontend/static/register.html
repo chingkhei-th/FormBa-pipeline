@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>User Registration</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background: #f8f9fa;
+				padding: 20px;
+			}
+			.container {
+				max-width: 600px;
+				margin: auto;
+				background: #fff;
+				padding: 20px;
+				border-radius: 8px;
+			}
+			input,
+			select,
+			button {
+				width: 100%;
+				padding: 10px;
+				margin: 10px 0;
+			}
+			button {
+				background: black;
+				color: white;
+			}
+			#status-container {
+				margin-top: 20px;
+				text-align: center;
+				font-weight: bold;
+			}
+			/* Spinner Styles */
+			.spinner {
+				margin: 20px auto;
+				width: 50px;
+				height: 50px;
+				border: 6px solid #f3f3f3; /* Light grey */
+				border-top: 6px solid #3498db; /* Blue */
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h2>Register User</h2>
+			<form id="register-form">
+				<label for="institute">Institute</label>
+				<select id="institute"></select>
+
+				<label for="course">Course</label>
+				<select id="course"></select>
+
+				<label for="knowledge">Knowledge Level</label>
+				<select id="knowledge"></select>
+
+				<label for="phone">Phone Number</label>
+				<input type="text" id="phone" pattern="\d{10}" required />
+
+				<label for="email">Email</label>
+				<input type="email" id="email" required />
+
+				<label for="password">Password</label>
+				<input type="password" id="password" required />
+
+        		<h3>Upload Documents</h3>
+				<!-- Separate file inputs for each document type -->
+				<label for="aadhaar">Upload Aadhaar Document *</label>
+				<input type="file" id="aadhaar" required/>
+
+				<label for="caste">Upload Caste Document *</label>
+				<input type="file" id="caste" required/>
+
+				<label for="school_cert">Upload School Certificate Document (optional)</label>
+				<input type="file" id="school_cert" required/>
+
+				<label for="school_mark">Upload School Mark Document *</label>
+				<input type="file" id="school_mark" required/>
+
+				<label for="uni_cert">Upload University Certificate Document (optional)</label>
+				<input type="file" id="uni_cert" />
+
+				<label for="uni_mark">Upload University Mark Document (optional)</label>
+				<input type="file" id="uni_mark" />
+
+        		<h3>Upload Photos</h3>
+				<label for="passport_photo">Upload Passport Photo</label>
+				<input type="file" id="passport_photo" accept="image/*" required/>
+
+				<label for="signature_photo">Upload Signature</label>
+				<input type="file" id="signature_photo" accept="image/*" required/>
+
+				<button type="submit">Submit</button>
+			</form>
+			<!-- Status container -->
+			<div id="status-container">
+				<p id="status"></p>
+				<div id="spinner" class="spinner" style="display: none"></div>
+			</div>
+		</div>
+
+
+		<script>
+			// Fetch dropdowns; unchanged from before.
+			async function fetchDropdowns() {
+				let token = localStorage.getItem("token");
+				if (!token) {
+					window.location.href = "login.html";
+					return;
+				}
+
+				let headers = { Authorization: "Bearer " + token };
+
+				let institutes = await fetch("http://localhost:8000/institutes/", { headers }).then((res) => res.json());
+				let courses = await fetch("http://localhost:8000/courses/", { headers }).then((res) => res.json());
+				let knowledge = await fetch("http://localhost:8000/knowledge/", { headers }).then((res) => res.json());
+
+				document.getElementById("institute").innerHTML = institutes.map(i => `<option value="${i.id}">${i.institute_names}</option>`).join("");
+				document.getElementById("course").innerHTML = courses.map(c => `<option value="${c.id}">${c.course_name}</option>`).join("");
+				document.getElementById("knowledge").innerHTML = knowledge.map(k => `<option value="${k.id}">${k.knowledge_in}</option>`).join("");
+			}
+
+			// Removed the triggerClassification function because extraction is triggered automatically in the backend
+
+			// Poll submission status using submissionId
+			async function pollSubmissionStatus(submissionId) {
+			    const MAX_ATTEMPTS = 30;
+			    let attempts = 0;
+			    return new Promise((resolve, reject) => {
+			        const checkStatus = async () => {
+			            try {
+			                const response = await fetch(`http://localhost:8000/submissions/${submissionId}/status`, {
+			                    headers: {
+			                        Authorization: "Bearer " + localStorage.getItem("token"),
+			                    },
+			                });
+			                const data = await response.json();
+			                console.log("Submission status data:", data); // Debug log
+			                if (data && data.status) {
+			                    document.getElementById("status").textContent = data.status;
+			                    if (data.status.includes("Completed")) {
+                        			resolve(data.status);
+			                    } else if (data.status.includes("Failed")) {
+			                        reject(data.status);
+			                    } else if (attempts++ < MAX_ATTEMPTS) {
+			                        setTimeout(checkStatus, 6000); // Poll every 6 seconds
+			                    } else {
+			                        reject("Timeout waiting for completion");
+			                    }
+			                } else {
+			                    reject("Invalid status response");
+			                }
+			            } catch (error) {
+			                reject(error);
+			            }
+			        };
+			        checkStatus();
+			    });
+			}
+
+			// Modified form submission handler:
+			document.getElementById("register-form").addEventListener("submit", async (e) => {
+				e.preventDefault();
+
+				let token = localStorage.getItem("token");
+				if (!token) return (window.location.href = "login.html");
+
+				let formData = new FormData();
+    			formData.append("institute_name", document.getElementById("institute").value);
+    			formData.append("course_interested", document.getElementById("course").value);
+    			formData.append("knowledge_id", document.getElementById("knowledge").value);
+    			formData.append("phone_no", document.getElementById("phone").value);
+    			formData.append("email", document.getElementById("email").value);
+    			formData.append("password", document.getElementById("password").value);
+
+				// Append separate file inputs for documents (instead of one multiple file input)
+				const aadhaarFile = document.getElementById("aadhaar").files[0];
+				if (aadhaarFile) formData.append("aadhaar_document", aadhaarFile);
+
+				const casteFile = document.getElementById("caste").files[0];
+				if (casteFile) formData.append("caste_document", casteFile);
+
+				const schoolCertFile = document.getElementById("school_cert").files[0];
+				if (schoolCertFile) formData.append("school_cert_document", schoolCertFile);
+
+				const schoolMarkFile = document.getElementById("school_mark").files[0];
+				if (schoolMarkFile) formData.append("school_mark_document", schoolMarkFile);
+
+				const uniCertFile = document.getElementById("uni_cert").files[0];
+				if (uniCertFile) formData.append("uni_cert_document", uniCertFile);
+
+				const uniMarkFile = document.getElementById("uni_mark").files[0];
+				if (uniMarkFile) formData.append("uni_mark_document", uniMarkFile);
+
+				// Append passport and signature photos as before
+				const passportFile = document.getElementById("passport_photo").files[0];
+				if (passportFile) formData.append("passport_photo", passportFile);
+				const signatureFile = document.getElementById("signature_photo").files[0];
+				if (signatureFile) formData.append("signature_photo", signatureFile);
+
+				// Update status message
+				document.getElementById("status").textContent = "Creating user...";
+				document.getElementById("spinner").style.display = "block";
+
+				let response = await fetch("http://localhost:8000/users/", {
+					method: "POST",
+					headers: { Authorization: "Bearer " + token },
+					body: formData,
+				});
+
+				let data = await response.json();
+				if (response.ok) {
+					// Use the submission_id returned by the backend
+					document.getElementById("status").textContent = "User created successfully. Starting document extraction...";
+					const submissionId = data.submission_id;
+					// Start polling for extraction status
+					try {
+						await pollSubmissionStatus(submissionId);
+						document.getElementById("status").textContent = `Extraction complete. Submission ID: ${submissionId}`;
+					} catch (error) {
+						document.getElementById("status").textContent = `Error: ${error}`;
+					} finally {
+						document.getElementById("spinner").style.display = "none";
+					}
+				} else {
+					const errorData = await response.json();
+				    let errorMessage = 'Submission failed';
+
+					document.getElementById("spinner").style.display = "none";
+					if (data.detail) {
+    				    if (Array.isArray(data.detail)) {
+    				        errorMessage = data.detail.map(e => `${e.loc.join(" -> ")}: ${e.msg}`).join("; ");
+    				    } else {
+    				        errorMessage = data.detail;
+    				    }
+    				}
+					document.getElementById("status").textContent = "Error: " + data.detail;
+				}
+			});
+
+			fetchDropdowns();
+		</script>
+	</body>
+</html>

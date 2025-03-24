@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; text-align: center; padding: 50px; }
+        .container { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: black; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Email/Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="error-message" style="color: red;"></p>
+    </div>
+
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            
+            let formData = new URLSearchParams();
+            formData.append("username", username);
+            formData.append("password", password);
+
+            let response = await fetch("http://localhost:8000/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData
+            });
+
+            let data = await response.json();
+            if (response.ok) {
+                localStorage.setItem("token", data.access_token);
+                window.location.href = "register.html"; // Redirect to registration
+            } else {
+                document.getElementById("error-message").textContent = "Invalid credentials";
+            }
+        });
+    </script>
+
+</body>
+</html>

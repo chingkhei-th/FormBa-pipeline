@@ -1,0 +1,9 @@
+Extract the following information from the text:
+- Name (person's full name)
+- Gender
+- Date of Birth
+- Aadhaar Number (12 digit numbers grouping 4 digits separated by whitespace )
+- Father's Name (father's name are usually found just before the address)
+- Address
+
+Return your answer in JSON format with keys: "name", "gender", "dob", "aadhaarno", "fathername", "address".

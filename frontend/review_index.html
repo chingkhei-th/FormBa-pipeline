@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Review System for Groundtruth</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div id="login-container" class="container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="main-container" class="container hidden">
+        <header>
+            <h1>Text Review System for Groundtruth</h1>
+            <button id="logout-btn">Logout</button>
+        </header>
+
+        <div id="category-selector">
+            <label>Select Document Category:</label>
+            <select id="category-select"></select>
+        </div>
+
+        <div id="status-tabs">
+            <button id="download-btn" class="hidden">Download Reviewed Data</button>
+            <div class="counts-container">
+                <div class="status-counts">
+                    <button class="tab-btn active" data-status="unreviewed">Unreviewed</button>
+                    <span id="unreviewed-count" class="count-badge">0</span>
+                    <button class="tab-btn" data-status="reviewed">Reviewed</button>
+                    <span id="reviewed-count" class="count-badge">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="review-container" class="hidden">
+            <div id="image-container">
+                <div class="zoom-controls">
+                    <button id="zoom-in">+</button>
+                    <button id="zoom-out">-</button>
+                    <button id="reset-zoom">Reset</button>
+                    <button id="pan-left"><</button>
+                    <button id="pan-up">^</button>
+                    <button id="pan-right">></button>
+                    <button id="pan-down">v</button>
+                </div>
+                <div class="image-wrapper">
+                    <div id="image-container-inner">
+                        <!-- <img id="document-image" src="" alt="Document Image"> -->
+                        <img id="document-image" src="" alt="Document Image">
+                    </div>
+                </div>
+                <div class="document-count"></div>
+            </div>
+            <div id="data-container">
+                <div id="entries-list"></div>
+                <div id="navigation">
+                    <button id="prev-btn">Previous</button>
+                    <button id="save-btn">Update</button>
+                    <button id="next-btn">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/main.js"></script>
+</body>
+</html>

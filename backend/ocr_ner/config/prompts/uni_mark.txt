@@ -1,0 +1,11 @@
+Extract the following information from the text:
+- Name (student's full name)
+- University's Name
+- Degree Type
+- Passout Year
+- College or Department Name
+- Roll Number
+- Division
+- Subject
+
+Return your answer in JSON format with keys: "name", "university_name", "degree", "passout", "college_dept", "roll_number", "division", "subject".

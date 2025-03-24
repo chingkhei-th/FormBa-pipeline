@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: black; color: white; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>User Registration</h2>
+        <form id="user-form">
+            <label for="institute">Institute</label>
+            <select id="institute"></select>
+
+            <label for="course">Course</label>
+            <select id="course"></select>
+
+            <label for="knowledge">Knowledge Level</label>
+            <select id="knowledge"></select>
+
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" pattern="\d{10}" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+
+            <!-- Document Uploads -->
+            <div class="document-group">
+                <label>Aadhaar Document</label>
+                <input type="file" id="aadhaar_document" accept=".pdf,.jpg,.png" required>
+            </div>
+
+            <div class="document-group">
+                <label>Caste Document</label>
+                <input type="file" id="caste_document" accept=".pdf,.jpg,.png" required>
+            </div>
+
+            <div class="document-group">
+                <label>School Certificate</label>
+                <input type="file" id="school_cert_document" accept=".pdf,.jpg,.png" required>
+            </div>
+
+            <div class="document-group">
+                <label>School Marksheet</label>
+                <input type="file" id="school_mark_document" accept=".pdf,.jpg,.png" required>
+            </div>
+
+            <div class="document-group">
+                <label>University Certificate (Optional)</label>
+                <input type="file" id="uni_cert_document" accept=".pdf,.jpg,.png">
+            </div>
+
+            <div class="document-group">
+                <label>University Marksheet (Optional)</label>
+                <input type="file" id="uni_mark_document" accept=".pdf,.jpg,.png">
+            </div>
+
+            <label for="passport_photo">Passport Photo</label>
+            <input type="file" id="passport_photo">
+
+            <label for="signature_photo">Signature Photo</label>
+            <input type="file" id="signature_photo">
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        async function fetchDropdowns() {
+            try {
+                const [institutes, courses, knowledge] = await Promise.all([
+                    fetch('/institutes/').then(res => res.json()),
+                    fetch('/courses/').then(res => res.json()),
+                    fetch('/knowledge/').then(res => res.json())
+                ]);
+
+                document.getElementById("institute").innerHTML = institutes.map(i =>
+                    `<option value="${i.id}">${i.institute_names}</option>`
+                ).join('');
+
+                document.getElementById("course").innerHTML = courses.map(c =>
+                    `<option value="${c.id}">${c.course_name}</option>`
+                ).join('');
+
+                document.getElementById("knowledge").innerHTML = knowledge.map(k =>
+                    `<option value="${k.id}">${k.knowledge_in}</option>`
+                ).join('');
+
+            } catch (error) {
+                console.error('Error loading dropdowns:', error);
+                showMessage('Error loading form options', 'error');
+            }
+        }
+
+        document.getElementById("user-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+
+            // Add basic fields
+            formData.append('institute_name', document.getElementById('institute').value);
+            formData.append('course_interested', document.getElementById('course').value);
+            formData.append('knowledge_id', document.getElementById('knowledge').value || '');
+            formData.append('phone_no', document.getElementById('phone').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('password', document.getElementById('password').value);
+
+            // Append files with correct field names
+            appendFile(formData, 'aadhaar_document');
+            appendFile(formData, 'caste_document');
+            appendFile(formData, 'school_cert_document');
+            appendFile(formData, 'school_mark_document');
+            appendFile(formData, 'uni_cert_document');
+            appendFile(formData, 'uni_mark_document');
+            appendFile(formData, 'passport_photo');
+            appendFile(formData, 'signature_photo');
+
+            try {
+                const response = await fetch('/users/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Submission failed');
+                }
+
+                const result = await response.json();
+                showMessage('Registration successful! Submission ID: ' + result.submission_id, 'success');
+                document.getElementById("user-form").reset();
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage(error.message, 'error');
+            }
+        });
+
+        function appendFile(formData, fieldId) {
+            const fileInput = document.getElementById(fieldId);
+            if (fileInput.files[0]) {
+                formData.append(fieldId, fileInput.files[0], fileInput.files[0].name);
+            }
+        }
+
+        function showMessage(text, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            messageDiv.style.display = 'block';
+            setTimeout(() => messageDiv.style.display = 'none', 5000);
+        }
+
+        // Initialize form
+        fetchDropdowns();
+    </script>
+
+</body>
+</html>

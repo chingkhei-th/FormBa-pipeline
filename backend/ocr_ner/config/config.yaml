@@ -1,0 +1,35 @@
+paths:
+  input_dir: data/test
+  output_dir: data/processed
+
+ocr:
+  paddleocr_params:
+    lang: en
+    use_gpu: false
+    layout_analysis: true
+    enable_mkldnn: false
+
+doc_types:
+  aadhaar:
+    fields: [ name, gender, dob, aadhaarno, fathername, address ]
+    prompt: prompts/aadhaar.txt
+  caste:
+    fields: [ name, caste, application_number, relative, village_town, police_station, district, caste_name, issue_date ]
+    prompt: prompts/caste.txt
+  school_cert:
+    fields: [ name, exam_name, board, father_name, mother_name, roll_number, school, division, passout ]
+    prompt: prompts/school_cert.txt
+  school_mark:
+    fields: [ name, exam_name, passout, board, roll_number, school, stream, division ]
+    prompt: prompts/school_mark.txt
+  uni_cert:
+    fields: [ name, university, passout, college, roll_number, degree, division, subject ]
+    prompt: prompts/uni_cert.txt
+  uni_mark:
+    fields: [ name, university_name, degree, passout, college_dept, roll_number, division, subject ]
+    prompt: prompts/uni_mark.txt
+
+ner:
+  llm_model: HuggingFaceH4/zephyr-7b-beta
+  temperature: 0.5
+  max_new_tokens: 1024

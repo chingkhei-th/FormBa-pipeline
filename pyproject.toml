@@ -25,6 +25,7 @@ dependencies = [
     "pymupdf>=1.25.3",
     "python-dotenv>=1.0.1",
     "python-jose>=3.4.0",
+    "python-multipart>=0.0.20",
     "pyyaml>=6.0.2",
     "setuptools>=75.8.2",
     "sqlalchemy==2.0.25",
